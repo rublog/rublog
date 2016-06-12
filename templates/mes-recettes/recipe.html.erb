@@ -16,7 +16,7 @@
 
   <body>
     <div class="titleBox rowFlex padding">
-      <a id="home-icon" href="/"><i class="fa fa-home fa-3x" aria-hidden="true"></i></a>
+      <a id="home-icon" href="<%= url %>"><i class="fa fa-home fa-3x" aria-hidden="true"></i></a>
       <span class="title"><%= name %></span>
     </div>
     <div class = "metaWF rowFlex whiteframe">
@@ -28,7 +28,7 @@
       <% end %>
       </span>
       <span class="flexItem">Servings:
-        <%= servings %>x<i class="fa fa-user" aria-hidden="true"></i>
+        <%= servings %> <i class="fa fa-user" aria-hidden="true"></i>
       </span>
       <span class="flexItem lastItem">Price:
       <% ("1".."#{price}").each do |i| %>

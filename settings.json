@@ -4,5 +4,6 @@
     "description": "This is a Rublog demo, using 'mes-recettes' template.",
     "template": "mes-recettes",
     "dev_port": 4000,
-    "favicon": "static/favicon.png"
+    "favicon": "static/favicon.png",
+    "url_prod": "http://rublog.github.io/rublog"
 }

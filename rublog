@@ -19,6 +19,7 @@ class Rublog
   def initialize
     @s = self.load_settings()
     @s['pages_meta'] = []
+    @s['url'] = '/'
     FileUtils.mkdir_p (OUTPUT_PATH)
   end
 
@@ -83,10 +84,11 @@ class Rublog
   end
 
   def publish
+    @s['url'] = @s['url_prod']
+    self.build()
     script_path = File.expand_path(File.dirname(__FILE__))
     puts `
     cd #{script_path}
-    ./rublog build
     rm -rf ./dist && mkdir ./dist
     echo "mv #{OUTPUT_PATH}{.,}/* ./dist/"
     mv "#{OUTPUT_PATH}"/* ./dist/ ; mv "#{OUTPUT_PATH}"/.* ./dist/
@@ -120,6 +122,7 @@ class Rublog
     @s['pages_meta'].push(page_settings)
     page_settings['file_name'] = filename
     page_settings['favicon'] = @s['favicon']
+    page_settings['url'] = @s['url']
     test = self.erb(File.read(TEMPLATE_PATH+@s['template']+"/#{page_settings['template']}.html.erb"),page_settings)
     File.write(File.join(OUTPUT_PATH, filename), test)
   end
