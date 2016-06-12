@@ -10,6 +10,12 @@ Currently there is only one template 'mes recettes', designed to share recipes.
 
 ## Get started
 
+Fork the project  
+Remove gh-pages branch and all files in ``./pages``  
+Change the repo name  
+``git clone``  
+Update ``settings.json``  
+and  
 ``vagrant up``  
 ``cd /vagrant``  
 or  
