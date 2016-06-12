@@ -1,0 +1,52 @@
+<meta>
+{
+  "template": "recipe",
+  "tag_list": [
+    "ingredients",
+    "recipe"
+  ],
+  "name": "Crêpes",
+  "categories": [
+    "basic",
+    "dessert"
+  ],
+  "preparation_time": "10",
+  "cooking_time": "20",
+  "difficulty": "1",
+  "servings": "4",
+  "price": "1"
+}
+</meta>
+
+<ingredients>
+
+### Ingredients
+---
+
+- 250g flour
+- 4 eggs
+- 1/2 l milk
+- 1 pinch salt
+- 2 tablespoon sugar
+- 50g butter, melted
+
+</ingredients>
+
+<recipe>
+
+### Recipe
+---
+
+### Step 1
+
+In a large mixing bowl, whisk together the flour and the eggs. Gradually add in the milk and water, stirring to combine. Add the salt and butter; beat until smooth.
+
+### Step 2
+
+ Heat a lightly oiled griddle or frying pan over medium high heat. Pour or scoop the batter onto the griddle, using approximately 1/4 cup for each crepe. Tilt the pan with a circular motion so that the batter coats the surface evenly.
+
+### Step 3
+
+Cook the crepe for about 2 minutes, until the bottom is light brown. Loosen with a spatula, turn and cook the other side. Serve hot.
+
+</recipe>

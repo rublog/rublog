@@ -1,0 +1,52 @@
+<meta>
+
+{
+    "template": "recipe",
+    "tag_list": [
+        "ingredients",
+        "recipe"
+    ],
+    "name": {
+        "required": "true"
+    },
+    "categories": {
+        "required": "false",
+        "default": []
+    },
+    "preparation_time": {
+        "required": "true",
+        "desc": "Time in minutes"
+    },
+    "cooking_time": {
+        "required": "true",
+        "desc": "Time in minutes"
+    },
+    "difficulty": {
+        "required": "true",
+        "desc": "x/3"
+    },
+    "servings": {
+        "required": "true",
+        "desc": "How many people"
+    },
+    "price": {
+        "required": "true",
+        "desc": "x/3"
+    }
+}
+
+</meta>
+
+<ingredients>
+
+
+# markdown here
+
+</ingredients>
+
+<recipe>
+
+
+# markdown here
+
+</recipe>

@@ -1,0 +1,83 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+  
+    <title><%= title %></title>
+    <meta name="author" content="<%= author %>">
+    <meta name="description" content="<%= description %>">
+    <link rel="icon" href="<%= favicon %>">
+  
+    <link rel="stylesheet" href="static/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="static/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="static/css/main.css">
+  </head>
+  
+  <body>
+    <div class="titleBox rowFlex padding text-center">
+      <span class="title"><%= title %></span> by
+      <span class="author"><%= author %></span>
+    </div>
+
+    <div class="container">
+
+      <div class="description text-center">
+        <span><%= description %></span>
+      </div>
+
+      <hr>
+
+      <div class="row">
+        <div class="col-md-9">
+          <input id="filter" class="form-control" type="text" placeholder="Type here...">
+        </div>
+        <div class="col-md-3">
+          <select id="mooh" class="form-control">
+            <option value="-">Select category</option>
+            <% pages_meta.map{ |x| x['categories'].map(&:capitalize) }.flatten.uniq.sort.each do |category| %>
+              <option value="<%= category %>"><%= category %></option>
+            <% end %>
+          </select>
+        </div>
+      </div>
+
+      <hr>
+
+      <table class="table table-hover searchable" style="table-layout: fixed;">
+        <thead>
+          <tr>
+             <th class="col-md-5">Name</th>
+             <th class="col-md-2">Preparation time</th>
+             <th class="col-md-2">Difficulty</th>
+             <th class="col-md-3">Categories</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% pages_meta.each do |page_settings| %>
+          <tr class="row-active" onclick="document.location='<%= page_settings['file_name'] %>';">
+            <td><%= page_settings['name'] %></td>
+            <td><%= page_settings['preparation_time'].to_i+page_settings['cooking_time'].to_i %> min.</td>
+            <td>
+            <% ("1".."#{page_settings['difficulty']}").each do |i| %>
+              <i class="fa fa-star" aria-hidden="true"></i>
+            <% end %>
+            </td>
+            <td class="table-cat"><%= page_settings['categories'].join(" | ") %></td>
+          </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <hr>
+    </div>
+
+    <hr>
+    <div class="rowFlex text-center">
+      <span>Powered by <a href="https://github.com/rublog/rublog">Rublog</a></span>
+    </div>
+
+    <script src="static/jquery/jquery.min.js"></script>
+    <script src="static/bootstrap/bootstrap.min.js"></script>
+    <script src="static/js/index.js"></script>
+  </body>
+</html>

@@ -1,0 +1,51 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+  
+    <title><%= name %></title>
+    <meta name="author" content="<%= author %>">
+    <meta name="description" content="<%= description %>">
+    <link rel="icon" href="<%= favicon %>">
+  
+    <link rel="stylesheet" href="static/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="static/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="static/css/main.css">
+  </head>
+
+  <body>
+    <div class="titleBox rowFlex padding">
+      <a id="home-icon" href="/"><i class="fa fa-home fa-3x" aria-hidden="true"></i></a>
+      <span class="title"><%= name %></span>
+    </div>
+    <div class = "metaWF rowFlex whiteframe">
+      <span class="flexItem">Preparation time : <%= preparation_time %>min.</span>
+      <span class="flexItem">Cooking time : <%= cooking_time %>min.</span>
+      <span class="flexItem">Difficulty:
+      <% ("1".."#{difficulty}").each do |i| %>
+        <i class="fa fa-star" aria-hidden="true"></i>
+      <% end %>
+      </span>
+      <span class="flexItem">Servings:
+        <%= servings %>x<i class="fa fa-user" aria-hidden="true"></i>
+      </span>
+      <span class="flexItem lastItem">Price:
+      <% ("1".."#{price}").each do |i| %>
+        <i class="fa fa-star" aria-hidden="true"></i>
+      <% end %>
+      </span>
+    </div>
+    <div class = "containerRecipe rowFlex padding">
+      <div class = "ingredientsContainer whiteframe md-area">
+        <%= tags['ingredients'] %>
+      </div>
+      <div class = "stepsContainer whiteframe md-area">
+        <%= tags['recipe'] %>
+      </div>
+    </div>
+
+    <script src="static/jquery/jquery.min.js"></script>
+    <script src="static/bootstrap/bootstrap.min.js"></script>
+  </body>
+</html>

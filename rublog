@@ -1,0 +1,169 @@
+#!/usr/bin/env ruby
+
+require 'json'
+require 'erb'
+require 'ostruct'
+require 'fileutils'
+require 'redcarpet/compat'
+
+#------------------------------------------------------------------- variables -
+
+SETTINGS_FILE = './settings.json'
+TEMPLATE_PATH = './templates/'
+PAGES_PATH    = './pages/'
+OUTPUT_PATH   = './output/'
+EXTENSION     = 'rbg'
+
+class Rublog
+
+  def initialize
+    @s = self.load_settings()
+    @s['pages_meta'] = []
+    FileUtils.mkdir_p (OUTPUT_PATH)
+  end
+
+  def run(args)
+    @args=args
+    command = args[0]
+    allowed_commands = ['build', 'runserver', 'newpage', 'publish']
+    if allowed_commands.include?(command)
+      send(command)
+    else
+      raise "Invalid command. Have to be in #{allowed_commands}"
+    end
+  end
+
+#-------------------------------------------------------------------- commands -
+
+  def runserver
+    Thread.new { self.watcher() }
+    puts "Server listening on port #{@s['dev_port']}. Ctrl+c to stop."
+    `ruby -run -ehttpd #{OUTPUT_PATH} -p#{@s['dev_port']} >/dev/null 2>&1`
+  end
+
+  def newpage
+    if @args[1] && @args[2]
+      page_template = @args[1]
+      page_filename = @args[2]
+    else
+      raise "Missing arguments! 'newpage <subtemplate> <filename>'"
+    end
+    begin
+      template = File.read("#{TEMPLATE_PATH}/#{@s['template']}/#{page_template}.#{EXTENSION}").to_str
+    rescue
+      raise "Subtemplate #{page_template} not found in #{TEMPLATE_PATH}/#{@s['template']}"
+    end
+    template_settings = JSON.parse(get_tag_content(template,'meta'))
+    
+    template_settings.each do |tag|
+      if tag[1].class == Hash && tag[1].key?('required') && tag[1]['required'] == "true"
+        template_settings[tag[0]] = [(print "#{tag[0]} (#{tag[1]['desc']}) : "), STDIN.gets.rstrip][1]
+      elsif tag[1].class == Hash && tag[1].key?('default')
+        template_settings[tag[0]] = tag[1]['default']
+      end
+    end
+    out = "<meta>\n"+JSON.pretty_generate(template_settings)+"\n</meta>\n"
+    template_settings['tag_list'].each do |tag|
+      out += "\n<#{tag}>\n"+get_tag_content(template,tag)+"\n</#{tag}>\n"
+    end
+    File.write(File.join(PAGES_PATH, page_filename+'.'+EXTENSION), out)
+  end
+
+  def build
+    # Generate pages
+    page_list = Dir["#{PAGES_PATH}/*.#{EXTENSION}"]
+    page_list.map{ |page| self.process_page(page) }
+    # Generate index
+    index = self.erb(File.read(TEMPLATE_PATH+@s['template']+'/index.html.erb'),@s)
+    File.write(File.join(OUTPUT_PATH, 'index.html'), index)
+    # Copy static folder
+    FileUtils.cp_r("#{TEMPLATE_PATH}/#{@s['template']}/static", "#{OUTPUT_PATH}")
+    # Copy pages files
+    Dir["#{PAGES_PATH}/*"].reject{|f| f =~ /(.*\.#{EXTENSION})$/ }.map{|f| FileUtils.cp_r(f, "#{OUTPUT_PATH}")}
+  end
+
+  def publish
+    script_path = File.expand_path(File.dirname(__FILE__))
+    puts `
+    cd #{script_path}
+    ./rublog build
+    rm -rf ./dist && mkdir ./dist
+    echo "mv #{OUTPUT_PATH}{.,}/* ./dist/"
+    mv "#{OUTPUT_PATH}"/* ./dist/ ; mv "#{OUTPUT_PATH}"/.* ./dist/
+    touch ./forecestash && git add . && git stash
+    (git checkout --orphan gh-pages || git checkout gh-pages) && git branch --set-upstream-to=origin/gh-pages gh-pages && git pull
+    find . -type d \\( -path ./.git -o -path ./dist \\) -prune -o -exec rm -rf {} \\; 2> /dev/null
+    # mv ./dist/{.,}* . # syntax fail with bash in ruby :/
+    mv "./dist/"/* . ; mv "./dist/"/.* .
+    rmdir ./dist
+    git add . && git commit -am 'Publish auto commit'
+    git push origin gh-pages
+    git checkout -
+    git stash apply && git stash drop
+    rm ./forecestash
+    `
+  end
+
+#--------------------------------------------------------------------- methods -
+
+  def process_page(path)
+    page = File.read(path).to_str
+    page_settings = JSON.parse(get_tag_content(page,'meta'))
+
+    page_settings['tags'] = {}
+    page_settings['tag_list'].each do |tag|
+      page_settings['tags'].merge!({
+        tag =>  Markdown.new(get_tag_content(page,tag)).to_html
+      })
+    end
+    filename = File.basename(path, ".*") + '.html'
+    @s['pages_meta'].push(page_settings)
+    page_settings['file_name'] = filename
+    page_settings['favicon'] = @s['favicon']
+    test = self.erb(File.read(TEMPLATE_PATH+@s['template']+"/#{page_settings['template']}.html.erb"),page_settings)
+    File.write(File.join(OUTPUT_PATH, filename), test)
+  end
+
+  def get_tag_content(page,tag)
+    page.match(/<#{tag}>(.*)<\/#{tag}>/m).to_s.split("\n")[1..-2].join("\n")
+  end
+
+  def load_settings
+    JSON.parse(File.read(SETTINGS_FILE))
+  end
+
+  def erb(template, vars)
+    ERB.new(template).result(OpenStruct.new(vars).instance_eval { binding })
+  end
+
+  def watcher
+    # http://brettterpstra.com/2011/03/07/watch-for-file-changes-and-refresh-your-browser-automatically/
+    # watch.rb by Brett Terpstra, 2011 <http://brettterpstra.com>
+    # with credit to Carlo Zottmann <https://github.com/carlo/haml-sass-file-watcher>
+    filetypes = [EXTENSION]
+    watch_folder = PAGES_PATH
+    while true do
+      files = []
+      filetypes.each {|type|
+        files += Dir.glob( File.join( watch_folder, "**", "*.#{type}" ) )
+      }
+      new_hash = files.collect {|f| [ f, File.stat(f).mtime.to_i ] }
+      hash ||= new_hash
+      diff_hash = new_hash - hash
+
+      unless diff_hash.empty?
+        hash = new_hash
+        diff_hash.each do |df|
+          puts "Detected change in #{df[0]}, refreshing"
+          self.process_page(df[0])
+        end
+      end
+      sleep 1
+    end
+  end
+end
+
+#---------------------------------------------------------------------- Launch -
+
+rublog = Rublog.new()
+rublog.run(ARGV)
